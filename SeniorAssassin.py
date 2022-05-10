@@ -46,24 +46,17 @@ def workbook_setup():
     if extension ==".xlsx":
         wb = openpyxl.load_workbook(file_path)
         ws = wb.worksheets[0]
-        if ws.cell(row = 1, column = 2).value == "First Name":
+        if ws.cell(row = 1, column = 1).value == "Assassin First":
             status_label.config(text="Workbook Successfully Opened")
             excel_sheet_name_label.config(text=basename)
             assassin_list.delete(0, END)
-            for row in range(2, ws.max_row + 1):
+            for row in range(2, ws.max_row):
+                current = row - 2
                 current_person = []
-                for column in range(2, 5):
-                    current_person.append(ws.cell(row=row, column=column).value)
+                for column in range(1, 6):
+                    current_person.append(str(ws.cell(row=row, column=column).value))
+                print(current_person)
                 seniors_array.append(current_person)
-            selection_pool = copy.deepcopy(seniors_array)
-            for current in range(0, len(seniors_array)):
-                random_pick = random.choice(selection_pool)
-                while seniors_array[current] == random_pick:
-                    random_pick = random.choice(selection_pool)
-                seniors_array[current].append(random_pick[0])
-                seniors_array[current].append(random_pick[1])
-                selection_pool.remove(random_pick)
-                #Update Listbox
                 assassin_list.insert(END, str(seniors_array[current][0]) + " " + str(seniors_array[current][1]) + " - " + str(seniors_array[current][3]) + " " + str(seniors_array[current][4]) + " - " + str(seniors_array[current][2]))
         else:
             status_label.config(text="Error: Not a Valid File")
@@ -73,24 +66,6 @@ def workbook_setup():
         status_label.config(text="Error: Not a Valid File")
         wb = None
         ws = None
-
-def save():
-    master_wb = openpyxl.Workbook()
-    master_ws = master_wb.active
-    master_ws.cell(row=1, column=1).value = "Assassin First"
-    master_ws.cell(row=1, column=2).value = "Assassin Last"
-    master_ws.cell(row=1, column=3).value = "Assassin Email"
-    master_ws.cell(row=1, column=4).value = "Target First"
-    master_ws.cell(row=1, column=5).value = "Target Last"
-    currentDirectory = os.getcwd()
-    for current in range(len(seniors_array)):
-        row = current + 2
-        master_ws.cell(row=row, column=1).value = seniors_array[current][0]
-        master_ws.cell(row=row, column=2).value = seniors_array[current][1]
-        master_ws.cell(row=row, column=3).value = seniors_array[current][2]
-        master_ws.cell(row=row, column=4).value = seniors_array[current][3]
-        master_ws.cell(row=row, column=5).value = seniors_array[current][4]
-        master_wb.save(str(currentDirectory) + "/Master_List.xlsx")
 
 def email():
     if wb == None or ws == None:
@@ -105,10 +80,10 @@ def email():
             msg = MIMEMultipart()
             msg['From'] = fromaddr
             msg['To'] = toaddr
-            msg['Subject'] = "Your (New) Target"
+            msg['Subject'] = "Your Target (Game #2)"
 
             #Message Body
-            body = seniors_array[current][0] + ",\n" + "I made a mistake, my bad.\nYou need to assassinate " + seniors_array[current][3] + " " + seniors_array[current][4] + ".\nGood luck."
+            body = seniors_array[current][0] + ",\n" + "You need to assassinate " + seniors_array[current][3] + " " + seniors_array[current][4] + ".\nGood luck."
             msg.attach(MIMEText(body, 'plain'))
 
             #SMTP Settings
@@ -125,10 +100,7 @@ init_button.place(x = 70, y = 265)
 email_button = Button(main, text="Email", command = email)
 email_button.place(x = 210, y = 265)
 
-save_button = Button(main, text="Save", command = save)
-save_button.place(x = 270, y = 265)
-
 quit_button = Button(main, text="Quit", command = close_window)
-quit_button.place(x = 340, y = 265)
+quit_button.place(x = 270, y = 265)
 
 main.mainloop()
